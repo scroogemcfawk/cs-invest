@@ -1,0 +1,11 @@
+<configuration>
+    <appender name="SimpleConsole" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%logger{0} [%highlight(%level)]: %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="debug">
+        <appender-ref ref="SimpleConsole" />
+    </root>
+</configuration>
