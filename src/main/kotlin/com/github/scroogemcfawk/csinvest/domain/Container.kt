@@ -3,7 +3,8 @@ package com.github.scroogemcfawk.csinvest.domain
 
 class Container(
     name: String,
-    rarity: Rarity
+    rarity: Rarity,
+    type: ContainerType
 ): Item(name, rarity)
 
 
