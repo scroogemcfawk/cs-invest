@@ -8,8 +8,15 @@ abstract class Item(
     override fun toString(): String {
         return "Item(name=$name, rarity=${rarity})"
     }
+
 }
 
+abstract class ItemBuilder {
+    var name: String = ""
+    var rarity: Rarity = Rarity.UNDEFINED
+
+    abstract fun build(): Item
+}
 
 enum class Rarity {
     COMMON,
@@ -18,5 +25,7 @@ enum class Rarity {
     MYTHICAL,
     LEGENDARY,
     ANCIENT,
-    IMMORTAL
+    IMMORTAL,
+
+    UNDEFINED;
 }
