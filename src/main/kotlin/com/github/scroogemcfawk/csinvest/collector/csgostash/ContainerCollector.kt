@@ -4,12 +4,15 @@ import com.github.scroogemcfawk.csinvest.domain.Container
 import com.github.scroogemcfawk.csinvest.domain.ContainerBuilder
 import com.github.scroogemcfawk.csinvest.domain.ContainerType
 import com.github.scroogemcfawk.csinvest.domain.Rarity
+import jakarta.annotation.Resource
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import org.jsoup.select.Elements
 import org.slf4j.LoggerFactory
+import org.springframework.stereotype.Component
 
+@Component
 class ContainerCollector {
 
     private companion object {
@@ -18,7 +21,8 @@ class ContainerCollector {
 
     private val log = LoggerFactory.getLogger(ContainerCollector::class.java)
 
-    private val homePage: Document by lazy { Jsoup.connect("https://csgostash.com/").get() }
+    @Resource(name = "homePage")
+    private lateinit var homePage: Document
 
     fun get(): ArrayList<Container> {
         val containers = ArrayList<Container>()
@@ -117,7 +121,7 @@ class ContainerCollector {
             containers.addAll(fetchPinPacks(containerBuilder, pinElements))
             containers.addAll(fetchPatchPacks(containerBuilder, patchElements))
             containers.addAll(fetchGraffitiBoxes(containerBuilder, graffitiElements))
-            containers.addAll(fetchContainersFromOtherPage(containerBuilder, otherHTML))
+            containers.addAll(fetchContainersFromOtherPage(otherHTML))
 
         } ?: {
             log.warn("'Other' menu not found.")
@@ -244,7 +248,7 @@ class ContainerCollector {
         return containers
     }
 
-    private fun fetchContainersFromOtherPage(prototype: ContainerBuilder, other: Elements): ArrayList<Container> {
+    private fun fetchContainersFromOtherPage(other: Elements): ArrayList<Container> {
         log.debug("Fetching other STICKER_CAPSULE Containers")
 
         val containers = ArrayList<Container>()
@@ -253,9 +257,6 @@ class ContainerCollector {
             log.warn("Unexpected section size found.")
             return containers
         }
-
-        // using prototype so it doesn't change outside of function
-        val containerBuilder = prototype.withType(ContainerType.STICKER_CAPSULE)
 
         other[0].selectFirst("a")?.let { a ->
             containers.addAll(

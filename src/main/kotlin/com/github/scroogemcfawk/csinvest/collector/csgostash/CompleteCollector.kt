@@ -2,12 +2,9 @@ package com.github.scroogemcfawk.csinvest.collector.csgostash
 
 import com.github.scroogemcfawk.csinvest.collector.ItemCollector
 import com.github.scroogemcfawk.csinvest.domain.*
-import org.jsoup.Jsoup
-import org.jsoup.nodes.Document
-import org.jsoup.nodes.Element
-import org.jsoup.select.Elements
 import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
+import org.springframework.beans.factory.annotation.Autowired
 
 
 /**
@@ -17,7 +14,8 @@ class CompleteCollector: ItemCollector {
 
     private val log = LoggerFactory.getLogger(CompleteCollector::class.java)
 
-    private val containerCollector = ContainerCollector()
+    @Autowired
+    private lateinit var containerCollector: ContainerCollector
 
     init {
         log.atLevel(Level.DEBUG)
