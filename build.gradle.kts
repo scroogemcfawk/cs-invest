@@ -1,6 +1,9 @@
 plugins {
     kotlin("jvm") version "1.9.0"
+    id("org.springframework.boot") version "3.2.0"
 }
+
+apply(plugin = "io.spring.dependency-management")
 
 group = "com.github.scroogemcfawk"
 version = "0.0.1"
@@ -17,6 +20,8 @@ dependencies {
 
     implementation("org.jsoup:jsoup:1.16.2")
 
+    implementation("org.springframework.boot:spring-boot-starter")
+
     testImplementation(kotlin("test"))
 }
 
@@ -25,5 +30,5 @@ tasks.test {
 }
 
 kotlin {
-    jvmToolchain(8)
+    jvmToolchain(17)
 }
