@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration
 open class CollectorConfig {
 
     @Bean
-    open fun getCsgoStashItemCollector(): CompleteCollector {
+    open fun getItemCollector(): ItemCollector {
         return CompleteCollector()
     }
 
