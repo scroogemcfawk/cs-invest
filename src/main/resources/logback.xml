@@ -1,11 +1,25 @@
 <configuration>
     <appender name="SimpleConsole" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%logger{0} [%highlight(%level)]: %msg%n</pattern>
+            <pattern>[%highlight(%level)]: %msg%n</pattern>
         </encoder>
     </appender>
 
-    <root level="debug">
+    <appender name="DebugConsole" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>[%highlight(%level)]: %logger{0}.%M - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="com.github.scroogemcfawk.csinvest.collector.csgostash.CompleteCollector"
+            level="DEBUG"
+            additivity="false"
+    >
+        <appender-ref ref="DebugConsole" />
+    </logger>
+
+    <root level="info">
         <appender-ref ref="SimpleConsole" />
+        <appender-ref ref="DebugConsole" />
     </root>
 </configuration>
