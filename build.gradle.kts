@@ -22,6 +22,8 @@ dependencies {
 
     implementation("org.springframework.boot:spring-boot-starter")
 
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
+
     testImplementation(kotlin("test"))
 }
 
