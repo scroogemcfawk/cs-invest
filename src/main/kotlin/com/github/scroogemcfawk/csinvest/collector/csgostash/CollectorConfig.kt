@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Lazy
 
+
 @Configuration
 open class CollectorConfig {
 
@@ -16,8 +17,14 @@ open class CollectorConfig {
 
     @Lazy
     @Bean(name = ["homePage"])
-    open fun getHomePage(): Document {
+    open fun homePage(): Document {
         return Jsoup.connect("https://csgostash.com/").get()
+    }
+
+    @Lazy
+    @Bean(name = ["collectorContainer"])
+    open fun collectorContainer(): ContainerCollector {
+        return ContainerCollector()
     }
 
 }

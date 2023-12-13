@@ -16,7 +16,9 @@ open class Application {
     @Bean
     open fun commandLineRunner(): CommandLineRunner {
         return CommandLineRunner {
-            println(collector.getContainers())
+            collector.getAll().forEach {
+                println(it)
+            }
         }
     }
 }

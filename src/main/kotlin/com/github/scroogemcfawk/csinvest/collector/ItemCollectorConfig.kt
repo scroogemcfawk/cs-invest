@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Configuration
 
 
 @Configuration
-open class CollectorConfig {
+open class ItemCollectorConfig {
 
     @Bean
     open fun getItemCollector(): ItemCollector {
