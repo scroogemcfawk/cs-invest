@@ -10,7 +10,6 @@ import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import org.jsoup.select.Elements
 import org.slf4j.LoggerFactory
-import org.springframework.stereotype.Component
 
 
 class ContainerCollector {

@@ -5,8 +5,6 @@ import com.github.scroogemcfawk.csinvest.domain.*
 import jakarta.annotation.Resource
 import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.Service
 
 
 /**
@@ -16,7 +14,7 @@ class CompleteCollector: ItemCollector {
 
     private val log = LoggerFactory.getLogger(CompleteCollector::class.java)
 
-    @Resource(name = "collectorContainer")
+    @Resource(name = "containerCollector")
     private lateinit var containerCollector: ContainerCollector
 
     init {

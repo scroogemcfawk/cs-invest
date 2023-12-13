@@ -22,8 +22,8 @@ open class CollectorConfig {
     }
 
     @Lazy
-    @Bean(name = ["collectorContainer"])
-    open fun collectorContainer(): ContainerCollector {
+    @Bean(name = ["containerCollector"])
+    open fun containerCollector(): ContainerCollector {
         return ContainerCollector()
     }
 
