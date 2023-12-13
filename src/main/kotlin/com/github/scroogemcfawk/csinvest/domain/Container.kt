@@ -5,7 +5,7 @@ class Container(
     name: String,
     rarity: Rarity,
     val type: ContainerType
-): Item(name, rarity) {
+) : Item(name, rarity) {
 
     override fun toString(): String {
         return "Container(name=$name, rarity=$rarity, type=$type)"
