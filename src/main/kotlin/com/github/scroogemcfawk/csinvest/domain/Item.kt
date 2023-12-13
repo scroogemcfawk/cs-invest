@@ -15,7 +15,13 @@ abstract class ItemBuilder {
     var name: String = ""
     var rarity: Rarity = Rarity.UNDEFINED
 
+    abstract fun withName(name: String): ItemBuilder
+
+    abstract fun withRarity(rarity: Rarity): ItemBuilder
+
     abstract fun build(): Item
+
+    abstract fun copy(): ItemBuilder
 }
 
 enum class Rarity {

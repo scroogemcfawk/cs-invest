@@ -16,17 +16,13 @@ class Container(
 class ContainerBuilder: ItemBuilder() {
     var type = ContainerType.UNDEFINED
 
-    override fun build(): Container {
-        return Container(name, rarity, type)
-    }
-
-    fun withName(name: String): ContainerBuilder {
+    override fun withName(name: String): ContainerBuilder {
         val new = this.copy()
         new.name = name
         return new
     }
 
-    fun withRarity(rarity: Rarity): ContainerBuilder {
+    override fun withRarity(rarity: Rarity): ContainerBuilder {
         val new = this.copy()
         new.rarity = rarity
         return new
@@ -38,14 +34,17 @@ class ContainerBuilder: ItemBuilder() {
         return new
     }
 
-    private fun copy(): ContainerBuilder {
+    override fun build(): Container {
+        return Container(name, rarity, type)
+    }
+
+    override fun copy(): ContainerBuilder {
         val copy = ContainerBuilder()
         copy.name = name
         copy.rarity = rarity
         copy.type = type
         return copy
     }
-
 }
 
 
