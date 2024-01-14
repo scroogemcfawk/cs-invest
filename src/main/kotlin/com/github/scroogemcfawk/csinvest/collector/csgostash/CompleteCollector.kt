@@ -8,7 +8,7 @@ import org.slf4j.event.Level
 
 
 /**
- * Retrieves data from csgostash.com
+ * Retrieves CS2 marketable items data from csgostash.com
  */
 class CompleteCollector: ItemCollector {
 
@@ -16,6 +16,9 @@ class CompleteCollector: ItemCollector {
 
     @Resource(name = "containerCollector")
     private lateinit var containerCollector: ContainerCollector
+
+    @Resource(name = "consumableCollector")
+    private lateinit var consumableCollector: ConsumableCollector
 
     init {
         log.atLevel(Level.DEBUG)
@@ -25,11 +28,12 @@ class CompleteCollector: ItemCollector {
         val items = ArrayList<Item>()
 
         items.addAll(getContainers())
+        items.addAll(getConsumables())
 
         return items
     }
 
-    override fun getPaintings(): ArrayList<Item> {
+    override fun getPaintings(): ArrayList<Painting> {
         // TODO("Not yet implemented")
         return ArrayList()
     }
@@ -38,12 +42,11 @@ class CompleteCollector: ItemCollector {
         return containerCollector.get()
     }
 
-    override fun getConsumables(): ArrayList<Item> {
-        // TODO("Not yet implemented")
-        return ArrayList()
+    override fun getConsumables(): ArrayList<Consumable> {
+        return consumableCollector.get()
     }
 
-    override fun getMisc(): ArrayList<Item> {
+    override fun getMisc(): ArrayList<Misc> {
         // TODO("Not yet implemented")
         return ArrayList()
     }

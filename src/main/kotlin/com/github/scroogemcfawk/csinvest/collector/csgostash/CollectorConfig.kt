@@ -27,4 +27,10 @@ open class CollectorConfig {
         return ContainerCollector()
     }
 
+    @Lazy
+    @Bean(name = ["consumableCollector"])
+    open fun consumableCollector(): ConsumableCollector {
+        return ConsumableCollector()
+    }
+
 }

@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Bean
 
 @SpringBootApplication
 open class Application {
+
     @Autowired
     lateinit var collector: ItemCollector
 
