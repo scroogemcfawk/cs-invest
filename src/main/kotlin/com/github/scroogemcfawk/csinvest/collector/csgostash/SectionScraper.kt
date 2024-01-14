@@ -22,11 +22,11 @@ class SectionScraper(private val url: String) {
     }
 
     val size: Int = run {
-        val pagination = initial.select("ul.pagination")
-        if (pagination.size != 0) {
-            return@run pagination[0].childrenSize() - 2
-        }
-        return@run 0
+        val pagination = initial.selectFirst("ul.pagination")
+        return@run pagination?.let { ul ->
+            // take second element from the end
+            ul.children().takeLast(2)[0].text().toInt()
+        } ?: 0
     }
 
     fun get(): Elements {
