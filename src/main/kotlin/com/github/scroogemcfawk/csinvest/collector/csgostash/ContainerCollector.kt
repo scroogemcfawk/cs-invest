@@ -7,26 +7,25 @@ import com.github.scroogemcfawk.csinvest.domain.Rarity
 import jakarta.annotation.Resource
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import org.jsoup.nodes.Element
 import org.jsoup.select.Elements
 import org.slf4j.LoggerFactory
 
 
 class ContainerCollector {
 
-    private companion object {
-        private const val DROPDOWN_MENU_EXPECTED_SECTION_COUNT = 7
-    }
-
     private val log = LoggerFactory.getLogger(ContainerCollector::class.java)
 
-    @Resource(name = "homePage")
-    private lateinit var homePage: Document
+//    @Resource(name = "homePage")
+//    private lateinit var homePage: Document
+
+    @Resource(name = "otherMenuAccessor")
+    private lateinit var otherMenuAccessor: OtherMenuAccessor
 
     fun get(): ArrayList<Container> {
         val containers = ArrayList<Container>()
-        containers.addAll(fetchContainersFromNavigationPage())
-        containers.addAll(fetchContainersFromOtherMenu())
+        containers.addAll(
+            fetchContainersFromNavigationPage() + fetchContainersFromOtherMenu()
+        )
         return containers
     }
 
@@ -102,49 +101,25 @@ class ContainerCollector {
 
         val containers = ArrayList<Container>()
 
-        fetchOtherMenu()?.let { bar ->
-            val sections = fetchSectionsFromMenu(bar)
-
-            val musicElements = sections[1]
-            val patchElements = sections[3]
-            val pinElements = sections[4]
-
-            val graffitiElements = sections[5]
-            // for the last 2 sticker capsules  >:(  <- angry me
-            val otherHTML = sections[6]
-
+        otherMenuAccessor.getSections().let { bar ->
             // all containers have COMMON rarity
             val containerBuilder = ContainerBuilder().withRarity(Rarity.COMMON)
 
-            containers.addAll(fetchMusicKitBoxes(containerBuilder, musicElements))
-            containers.addAll(fetchPinPacks(containerBuilder, pinElements))
-            containers.addAll(fetchPatchPacks(containerBuilder, patchElements))
-            containers.addAll(fetchGraffitiBoxes(containerBuilder, graffitiElements))
-            containers.addAll(fetchContainersFromOtherPage(otherHTML))
-
-        } ?: {
-            log.warn("'Other' menu not found.")
+            try {
+                containers.addAll(
+                    fetchMusicKitBoxes(containerBuilder, bar[OtherMenuSection.MUSIC]!!) +
+                    fetchPinPacks(containerBuilder, bar[OtherMenuSection.PINS]!!) +
+                    fetchPatchPacks(containerBuilder, bar[OtherMenuSection.PATCHES]!!) +
+                    fetchGraffitiBoxes(containerBuilder, bar[OtherMenuSection.GRAFFITI]!!) +
+                    // for the last 2 sticker capsules  >:(  <- angry me
+                    fetchContainersFromOtherPage(bar[OtherMenuSection.KEYS_AND_OTHER_ITEMS]!!)
+                )
+            } catch (_: Exception) {
+                log.warn("Failed to fetch items from other menu.")
+            }
         }
 
         return containers
-    }
-
-    private fun fetchOtherMenu(): Element? {
-        return homePage.selectFirst("ul.nav.navbar-nav li.dropdown:contains(Other)")
-    }
-
-    private fun fetchSectionsFromMenu(bar: Element): ArrayList<Elements> {
-        val sectionsHTML = ArrayList(bar.html().split("<li class=\"divider\"></li>"))
-        if (sectionsHTML.size != DROPDOWN_MENU_EXPECTED_SECTION_COUNT) {
-            log.warn("Unexpected section count found (${sectionsHTML.size}).")
-        }
-        return parseSections(sectionsHTML)
-    }
-
-    private fun parseSections(sections: ArrayList<String>): ArrayList<Elements> {
-        return ArrayList(
-            sections.map { Jsoup.parse(it).select("li:has(a)") }
-        )
     }
 
     private fun fetchMusicKitBoxes(prototype: ContainerBuilder, music: Elements): ArrayList<Container> {

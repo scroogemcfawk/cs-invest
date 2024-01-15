@@ -22,6 +22,12 @@ open class CollectorConfig {
     }
 
     @Lazy
+    @Bean(name = ["otherMenuAccessor"])
+    open fun otherMenuAccessor(): OtherMenuAccessor {
+        return OtherMenuAccessorImpl()
+    }
+
+    @Lazy
     @Bean(name = ["containerCollector"])
     open fun containerCollector(): ContainerCollector {
         return ContainerCollector()
@@ -32,5 +38,7 @@ open class CollectorConfig {
     open fun consumableCollector(): ConsumableCollector {
         return ConsumableCollector()
     }
+
+
 
 }
