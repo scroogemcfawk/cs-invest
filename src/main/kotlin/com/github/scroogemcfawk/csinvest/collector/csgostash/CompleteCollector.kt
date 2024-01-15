@@ -27,7 +27,7 @@ class CompleteCollector: ItemCollector {
     override fun getAll(): ArrayList<Item> {
         val items = ArrayList<Item>()
 
-        items.addAll(getContainers())
+//        items.addAll(getContainers())
         items.addAll(getConsumables())
 
         return items
