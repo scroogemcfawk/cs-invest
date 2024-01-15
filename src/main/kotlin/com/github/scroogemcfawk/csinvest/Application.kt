@@ -17,9 +17,11 @@ open class Application {
     @Bean
     open fun commandLineRunner(): CommandLineRunner {
         return CommandLineRunner {
-            collector.getAll().forEach {
+            val items = collector.getAll()
+            items.forEach {
                 println(it)
             }
+            println(items.size)
         }
     }
 }
