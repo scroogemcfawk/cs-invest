@@ -4,6 +4,7 @@ import com.github.scroogemcfawk.csinvest.domain.Container
 import com.github.scroogemcfawk.csinvest.domain.ContainerBuilder
 import com.github.scroogemcfawk.csinvest.domain.ContainerType
 import com.github.scroogemcfawk.csinvest.domain.Rarity
+import com.github.scroogemcfawk.csinvest.utils.contains // convenient regex contains string for when(String)
 import jakarta.annotation.Resource
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
@@ -241,10 +242,6 @@ class ContainerCollector {
         }
 
         return containers
-    }
-
-    private operator fun Regex.contains(text: String): Boolean {
-        return matches(text)
     }
 
 }
