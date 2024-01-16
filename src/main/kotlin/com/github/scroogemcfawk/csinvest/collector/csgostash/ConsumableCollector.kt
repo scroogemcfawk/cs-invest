@@ -6,6 +6,7 @@ import com.github.scroogemcfawk.csinvest.domain.ConsumableType
 import com.github.scroogemcfawk.csinvest.domain.Rarity
 import jakarta.annotation.Resource
 import org.jsoup.nodes.Document
+import org.jsoup.select.Elements
 import org.slf4j.LoggerFactory
 
 
@@ -16,6 +17,9 @@ class ConsumableCollector {
     @Resource(name = "homePage")
     private lateinit var homePage: Document
 
+    @Resource(name = "otherMenuAccessor")
+    private lateinit var otherMenuAccessor: OtherMenuAccessor
+
     init {
         log.atDebug()
     }
@@ -24,7 +28,10 @@ class ConsumableCollector {
         val consumables = ArrayList<Consumable>()
 
         consumables.addAll(
-            fetchStickers() + fetchPatches() + fetchKeysAndPasses() + fetchGraffities()
+//            fetchStickers() +
+//                    fetchPatches() +
+                            fetchKeysAndPasses() +
+                            fetchGraffities()
         )
 
         return consumables
@@ -33,23 +40,27 @@ class ConsumableCollector {
     private fun fetchStickers(): ArrayList<Consumable> {
         val stickers = ArrayList<Consumable>()
 
-
-//        val tournamentStickersPageUrl = "https://csgostash.com/stickers/tournament"
-//        val tournamentStickersPage = SectionScraper(tournamentStickersPageUrl)
-
         stickers += fetchRegularStickers()
+        stickers += fetchTournamentStickers()
 
-
-        // TODO("Not yet implemented")
         return stickers
     }
 
     private fun fetchPatches(): ArrayList<Consumable> {
         val patches = ArrayList<Consumable>()
-//        val menu = fetchOtherMenu(homePage)
-        // TODO see OtherMenuAccessor's todo
-//        println(menu)
-        // TODO("Not yet implemented")
+        val menu = otherMenuAccessor.getSections()
+
+        val allPageUrl = menu[OtherMenuSection.PATCHES]?.let {
+            it[0].select("a").attr("href")
+        } ?: run {
+            log.warn("Unexpected menu element while fetching patches.")
+            return patches
+        }
+
+        val patchTiles = SectionScraper(allPageUrl).get()
+
+        patches += fetchConsumablesFromTiles(patchTiles, ConsumableBuilder().withType(ConsumableType.PATCH))
+
         return patches
     }
 
@@ -67,13 +78,23 @@ class ConsumableCollector {
 
     private fun fetchRegularStickers(): ArrayList<Consumable> {
         val regularStickersPageUrl = "https://csgostash.com/stickers/regular"
-        val regularStickerPage = SectionScraper(regularStickersPageUrl).get()
+        val regularStickerTiles = SectionScraper(regularStickersPageUrl).get()
 
+        return fetchConsumablesFromTiles(regularStickerTiles, ConsumableBuilder().withType(ConsumableType.STICKER))
+    }
+
+    private fun fetchTournamentStickers(): ArrayList<Consumable> {
+        val tournamentStickersPageUrl = "https://csgostash.com/stickers/tournament"
+        val tournamentStickerTiles = SectionScraper(tournamentStickersPageUrl).get()
+
+        return fetchConsumablesFromTiles(tournamentStickerTiles, ConsumableBuilder().withType(ConsumableType.STICKER))
+
+    }
+
+    private fun fetchConsumablesFromTiles(tiles: Elements, prototype: ConsumableBuilder): ArrayList<Consumable> {
         val res = ArrayList<Consumable>()
 
-        val stickerPrototype = ConsumableBuilder().withType(ConsumableType.STICKER)
-
-        for (tile in regularStickerPage) {
+        for (tile in tiles) {
             run {
                 val name = tile.selectFirst("h3 > a")?.text() ?: let {
                     log.warn("Item name not found in tile markup.")
@@ -115,7 +136,7 @@ class ConsumableCollector {
                 }
 
                 res.add(
-                    stickerPrototype
+                    prototype
                         .withName(name)
                         .withRarity(rarity)
                         .build()
@@ -125,7 +146,6 @@ class ConsumableCollector {
         }
 
         return res
-
     }
 
 }
