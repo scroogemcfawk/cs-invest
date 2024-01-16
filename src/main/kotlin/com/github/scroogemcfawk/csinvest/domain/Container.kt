@@ -11,6 +11,9 @@ class Container(
         return "Container(name=$name, rarity=$rarity, type=$type)"
     }
 
+    override val builder: ContainerBuilder
+        get() = ContainerBuilder().withName(name).withRarity(rarity).withType(type)
+
 }
 
 

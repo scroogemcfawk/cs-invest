@@ -7,7 +7,45 @@ class Painting(
     val base: Base,
     val category: Category,
     val exterior: Exterior
-) : Item(name, rarity)
+) : Item(name, rarity) {
+
+    override val builder: PaintingBuilder
+        get() = PaintingBuilder().withName(name).withRarity(rarity).withBase(base).withCategory(category).withExterior(exterior)
+
+}
+
+
+class PaintingBuilder : ItemBuilder() {
+
+    override fun withName(name: String): PaintingBuilder {
+        TODO("Not yet implemented")
+    }
+
+    override fun withRarity(rarity: Rarity): PaintingBuilder {
+        TODO("Not yet implemented")
+    }
+
+    fun withBase(base: Base): PaintingBuilder {
+        TODO("Not yet implemented")
+    }
+
+    fun withCategory(category: Category): PaintingBuilder {
+        TODO("Not yet implemented")
+    }
+
+    fun withExterior(exterior: Exterior): PaintingBuilder {
+        TODO("Not yet implemented")
+    }
+
+    override fun build(): Item {
+        TODO("Not yet implemented")
+    }
+
+    override fun copy(): ItemBuilder {
+        TODO("Not yet implemented")
+    }
+
+}
 
 
 /**

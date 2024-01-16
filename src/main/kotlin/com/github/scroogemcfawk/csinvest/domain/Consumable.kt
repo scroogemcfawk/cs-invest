@@ -7,6 +7,9 @@ class Consumable(
     val type: ConsumableType
 ) : Item(name, rarity) {
 
+    override val builder: ConsumableBuilder
+        get() = ConsumableBuilder().withName(name).withRarity(rarity).withType(type)
+
     override fun toString(): String {
         return "Consumable(name=$name, rarity=$rarity, type=$type)"
     }
@@ -14,6 +17,7 @@ class Consumable(
 }
 
 class ConsumableBuilder: ItemBuilder() {
+
     var type = ConsumableType.UNDEFINED
 
     override fun withName(name: String): ConsumableBuilder {
@@ -45,6 +49,7 @@ class ConsumableBuilder: ItemBuilder() {
         copy.type = type
         return copy
     }
+
 }
 
 

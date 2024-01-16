@@ -5,6 +5,8 @@ abstract class Item(
     val rarity: Rarity
 ) {
 
+    abstract val builder: ItemBuilder
+
     override fun toString(): String {
         return "Item(name=$name, rarity=${rarity})"
     }
@@ -12,6 +14,7 @@ abstract class Item(
 }
 
 abstract class ItemBuilder {
+
     var name: String = ""
     var rarity: Rarity = Rarity.UNDEFINED
 
@@ -22,6 +25,7 @@ abstract class ItemBuilder {
     abstract fun build(): Item
 
     abstract fun copy(): ItemBuilder
+
 }
 
 enum class Rarity {
