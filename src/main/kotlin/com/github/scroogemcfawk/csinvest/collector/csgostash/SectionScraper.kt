@@ -4,6 +4,7 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.select.Elements
 import org.slf4j.LoggerFactory
+import kotlin.math.min
 
 
 /**
@@ -33,20 +34,22 @@ class SectionScraper(private val url: String) {
         } ?: 0
     }
 
-    fun get(): Elements {
+    fun get(pageLimit: Int = 0): Elements {
         log.debug("Scraping page '{}'", url)
 
         val result = Elements()
 
+        val upperBound = if (pageLimit == 0) size else min(pageLimit, size)
+
         // first page
         result.addAll(getItemsFromPage(initial))
-        log.debug("[1/{}] done", size)
+        log.debug("[1/{}] done", upperBound)
 
         // remaining pages
-        for (pageNumber in 2..size) {
+        for (pageNumber in 2..upperBound) {
             val page = Jsoup.connect("$url?page=$pageNumber").get()
             result.addAll(getItemsFromPage(page))
-            log.debug("[{}/{}] done", pageNumber, size)
+            log.debug("[{}/{}] done", pageNumber, upperBound)
         }
 
         return result
