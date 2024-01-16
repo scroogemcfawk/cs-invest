@@ -38,4 +38,35 @@ enum class Rarity {
     IMMORTAL,
 
     UNDEFINED;
+
+    companion object {
+        fun fromString(s: String): Rarity {
+            return when(s.uppercase()) {
+                "CONTRABAND" -> {
+                    IMMORTAL
+                }
+                "COVERT" -> {
+                    ANCIENT
+                }
+                "CLASSIFIED" -> {
+                    LEGENDARY
+                }
+                "RESTRICTED" -> {
+                    MYTHICAL
+                }
+                "MILSPEC" -> {
+                    RARE
+                }
+                "INDUSTRIAL" -> {
+                    UNCOMMON
+                }
+                "CONSUMER" -> {
+                    COMMON
+                }
+                else -> {
+                    UNDEFINED
+                }
+            }
+        }
+    }
 }
