@@ -20,6 +20,9 @@ class CompleteCollector: ItemCollector {
     @Resource(name = "consumableCollector")
     private lateinit var consumableCollector: ConsumableCollector
 
+    @Resource(name = "miscCollector")
+    private lateinit var miscCollector: MiscCollector
+
     init {
         log.atLevel(Level.DEBUG)
     }
@@ -28,7 +31,11 @@ class CompleteCollector: ItemCollector {
         val items = ArrayList<Item>()
 
 //        items.addAll(getContainers())
-        items.addAll(getConsumables())
+//        items.addAll(getConsumables())
+
+        items.addAll(getMisc())
+
+//        items.addAll(getPaintings())
 
         return items
     }
@@ -47,14 +54,7 @@ class CompleteCollector: ItemCollector {
     }
 
     override fun getMisc(): ArrayList<Misc> {
-        // TODO("Not yet implemented")
-        return ArrayList()
+        return miscCollector.get()
     }
-
-
-
-
-
-
 
 }

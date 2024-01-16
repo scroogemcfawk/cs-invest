@@ -39,6 +39,10 @@ open class CollectorConfig {
         return ConsumableCollector()
     }
 
-
+    @Lazy
+    @Bean(name = ["miscCollector"])
+    open fun miscCollector(): MiscCollector {
+        return MiscCollector()
+    }
 
 }
