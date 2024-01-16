@@ -4,6 +4,7 @@ import com.github.scroogemcfawk.csinvest.domain.Consumable
 import com.github.scroogemcfawk.csinvest.domain.ConsumableBuilder
 import com.github.scroogemcfawk.csinvest.domain.ConsumableType
 import com.github.scroogemcfawk.csinvest.domain.Rarity
+import com.github.scroogemcfawk.csinvest.utils.contains
 import jakarta.annotation.Resource
 import org.jsoup.nodes.Document
 import org.jsoup.select.Elements
@@ -28,10 +29,7 @@ class ConsumableCollector {
         val consumables = ArrayList<Consumable>()
 
         consumables.addAll(
-//            fetchStickers() +
-//                    fetchPatches() +
-                            fetchGraffities() +
-                                    fetchKeysAndPasses()
+            fetchStickers() + fetchPatches() + fetchGraffities() + fetchKeysAndPasses()
         )
 
         return consumables
@@ -40,8 +38,11 @@ class ConsumableCollector {
     private fun fetchStickers(): ArrayList<Consumable> {
         val stickers = ArrayList<Consumable>()
 
-        stickers += fetchRegularStickers()
-        stickers += fetchTournamentStickers()
+        val regularStickerPageUrl = "https://csgostash.com/stickers/regular"
+        val tournamentStickerPageUrl = "https://csgostash.com/stickers/tournament"
+
+        stickers += fetchStickersFromUrl(regularStickerPageUrl)
+        stickers += fetchStickersFromUrl(tournamentStickerPageUrl)
 
         return stickers
     }
@@ -59,7 +60,14 @@ class ConsumableCollector {
 
         val patchTiles = SectionScraper(allPageUrl).get()
 
-        patches += fetchConsumablesFromTiles(patchTiles, ConsumableBuilder().withType(ConsumableType.PATCH))
+        val patchBlanks = fetchConsumablesFromTiles(patchTiles, ConsumableBuilder().withType(ConsumableType.PATCH))
+
+        for (p in patchBlanks) {
+            val prototype = p.builder
+            prototype.name = prototype.name.removeSuffix("Patch").trim()
+            patches.add(prototype.build())
+            if (p.rarity == Rarity.UNDEFINED) log.warn("Unexpected UNDEFINED patch rarity found.")
+        }
 
         return patches
     }
@@ -79,28 +87,58 @@ class ConsumableCollector {
 
         graffiti += fetchConsumablesFromTiles(graffitiTiles, ConsumableBuilder().withType(ConsumableType.GRAFFITI))
 
+        for (g in graffiti) {
+            if (g.rarity == Rarity.UNDEFINED) log.warn("Unexpected UNDEFINED graffiti rarity found.")
+        }
+
         return graffiti
     }
 
     private fun fetchKeysAndPasses(): ArrayList<Consumable> {
         val keysAndPasses = ArrayList<Consumable>()
-        // TODO("Not yet implemented")
+
+        val menu = otherMenuAccessor.getSections()
+
+        val keysAndOtherItemsPageUrl = menu[OtherMenuSection.KEYS_AND_OTHER_ITEMS]?.let {
+            it[0].select("a").attr("href")
+        } ?: run {
+            log.warn("Unexpected menu element while fetching keys and passes.")
+            return keysAndPasses
+        }
+
+        val keyAndPassTiles = SectionScraper(keysAndOtherItemsPageUrl).get()
+
+        val keysAndPassesBlanks = fetchConsumablesFromTiles(keyAndPassTiles, ConsumableBuilder().withType(ConsumableType.UNDEFINED))
+
+        for (c in keysAndPassesBlanks) {
+            val prototype = c.builder
+            prototype.type = when (prototype.name) {
+                in Regex("[\\w\\s]* Pass( [\\w\\s+]*)?") -> {
+                    ConsumableType.PASS
+                }
+                in Regex("[:\\w\\s]* Key") -> {
+                    ConsumableType.KEY
+                }
+                else -> {
+                    continue // ignore capsules, name tag and tools
+                }
+            }
+            keysAndPasses.add(prototype.withRarity(Rarity.COMMON).build())
+        }
+
         return keysAndPasses
     }
 
-    private fun fetchRegularStickers(): ArrayList<Consumable> {
-        val regularStickersPageUrl = "https://csgostash.com/stickers/regular"
-        val regularStickerTiles = SectionScraper(regularStickersPageUrl).get()
+    private fun fetchStickersFromUrl(pageUrl: String): ArrayList<Consumable> {
+        val tiles = SectionScraper(pageUrl).get()
 
-        return fetchConsumablesFromTiles(regularStickerTiles, ConsumableBuilder().withType(ConsumableType.STICKER))
-    }
+        val stickers = fetchConsumablesFromTiles(tiles, ConsumableBuilder().withType(ConsumableType.STICKER))
 
-    private fun fetchTournamentStickers(): ArrayList<Consumable> {
-        val tournamentStickersPageUrl = "https://csgostash.com/stickers/tournament"
-        val tournamentStickerTiles = SectionScraper(tournamentStickersPageUrl).get()
+        for (s in stickers) {
+            if (s.rarity == Rarity.UNDEFINED) log.warn("Unexpected UNDEFINED sticker rarity found.")
+        }
 
-        return fetchConsumablesFromTiles(tournamentStickerTiles, ConsumableBuilder().withType(ConsumableType.STICKER))
-
+        return stickers
     }
 
     private fun fetchConsumablesFromTiles(tiles: Elements, prototype: ConsumableBuilder): ArrayList<Consumable> {
@@ -108,50 +146,12 @@ class ConsumableCollector {
 
         for (tile in tiles) {
             run {
-                val name = tile.selectFirst("h3 > a")?.text() ?: let {
-                    log.warn("Item name not found in tile markup.")
-                    return@run // continue for loop
-                }
 
-                val rarityString = tile.selectFirst("div.quality")?.className()?.split("-")?.last() ?: let {
-                    log.warn("Item rarity not found in tile markup.")
-                    return@run // continue for loop
-                }
+                val name = tile.select("h3, h4").joinToString(" | ") { it.text() }
 
-                // TODO make rarity converter
-                val rarity = when(rarityString) {
+                val rarityString = tile.selectFirst("div.quality")?.className()?.split("-")?.last() ?: ""
 
-                    "contraband" -> {
-                        Rarity.IMMORTAL
-                    }
-                    "covert" -> {
-                        Rarity.ANCIENT
-                    }
-                    "classified" -> {
-                        Rarity.LEGENDARY
-                    }
-                    "restricted" -> {
-                        Rarity.MYTHICAL
-                    }
-                    "milspec" -> {
-                        Rarity.RARE
-                    }
-                    "industrial" -> {
-                        Rarity.UNCOMMON
-                    }
-                    "consumer" -> {
-                        Rarity.COMMON
-                    }
-
-                    else -> {
-                        Rarity.UNDEFINED
-                    }
-                }
-
-                if (name.isBlank() || rarity == Rarity.UNDEFINED) {
-                    log.warn("Item name or quality have unexpected value in tile markup.")
-                    return@run
-                }
+                val rarity = Rarity.fromString(rarityString)
 
                 res.add(
                     prototype
