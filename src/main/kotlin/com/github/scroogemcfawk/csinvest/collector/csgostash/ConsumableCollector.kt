@@ -30,8 +30,8 @@ class ConsumableCollector {
         consumables.addAll(
 //            fetchStickers() +
 //                    fetchPatches() +
-                            fetchKeysAndPasses() +
-                            fetchGraffities()
+                            fetchGraffities() +
+                                    fetchKeysAndPasses()
         )
 
         return consumables
@@ -64,16 +64,28 @@ class ConsumableCollector {
         return patches
     }
 
+    private fun fetchGraffities(): ArrayList<Consumable> {
+        val graffiti = ArrayList<Consumable>()
+        val menu = otherMenuAccessor.getSections()
+
+        val allPageUrl = menu[OtherMenuSection.GRAFFITI]?.let {
+            it[0].select("a").attr("href")
+        } ?: run {
+            log.warn("Unexpected menu element while fetching graffities.")
+            return graffiti
+        }
+
+        val graffitiTiles = SectionScraper(allPageUrl).get()
+
+        graffiti += fetchConsumablesFromTiles(graffitiTiles, ConsumableBuilder().withType(ConsumableType.GRAFFITI))
+
+        return graffiti
+    }
+
     private fun fetchKeysAndPasses(): ArrayList<Consumable> {
         val keysAndPasses = ArrayList<Consumable>()
         // TODO("Not yet implemented")
         return keysAndPasses
-    }
-
-    private fun fetchGraffities(): ArrayList<Consumable> {
-        val graffities = ArrayList<Consumable>()
-        // TODO("Not yet implemented")
-        return graffities
     }
 
     private fun fetchRegularStickers(): ArrayList<Consumable> {
@@ -123,6 +135,12 @@ class ConsumableCollector {
                     }
                     "milspec" -> {
                         Rarity.RARE
+                    }
+                    "industrial" -> {
+                        Rarity.UNCOMMON
+                    }
+                    "consumer" -> {
+                        Rarity.COMMON
                     }
 
                     else -> {
