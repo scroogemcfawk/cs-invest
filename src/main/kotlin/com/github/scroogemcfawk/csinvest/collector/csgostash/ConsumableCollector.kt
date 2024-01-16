@@ -6,7 +6,6 @@ import com.github.scroogemcfawk.csinvest.domain.ConsumableType
 import com.github.scroogemcfawk.csinvest.domain.Rarity
 import com.github.scroogemcfawk.csinvest.utils.contains
 import jakarta.annotation.Resource
-import org.jsoup.nodes.Document
 import org.jsoup.select.Elements
 import org.slf4j.LoggerFactory
 
@@ -14,9 +13,6 @@ import org.slf4j.LoggerFactory
 class ConsumableCollector {
 
     private val log = LoggerFactory.getLogger(ConsumableCollector::class.java)
-
-    @Resource(name = "homePage")
-    private lateinit var homePage: Document
 
     @Resource(name = "otherMenuAccessor")
     private lateinit var otherMenuAccessor: OtherMenuAccessor
@@ -119,9 +115,7 @@ class ConsumableCollector {
                 in Regex("[:\\w\\s]* Key") -> {
                     ConsumableType.KEY
                 }
-                else -> {
-                    continue // ignore capsules, name tag and tools
-                }
+                else -> continue // ignore capsules, name tag and tools
             }
             keysAndPasses.add(prototype.withRarity(Rarity.COMMON).build())
         }

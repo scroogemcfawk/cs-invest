@@ -12,6 +12,8 @@ import kotlin.math.min
  */
 class SectionScraper(private val url: String) {
 
+    // TODO maybe cache?
+
     private val log = LoggerFactory.getLogger(SectionScraper::class.java)
 
     init {
@@ -19,10 +21,6 @@ class SectionScraper(private val url: String) {
     }
 
     private val initial: Document by lazy {
-//        Jsoup.connect(url)
-//            .header("Accept-Language", "en-US")
-//            .cookie("currency", currencyCookie)
-//            .get()
         Jsoup.connect(url).get()
     }
 

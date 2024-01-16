@@ -16,9 +16,6 @@ class ContainerCollector {
 
     private val log = LoggerFactory.getLogger(ContainerCollector::class.java)
 
-//    @Resource(name = "homePage")
-//    private lateinit var homePage: Document
-
     @Resource(name = "otherMenuAccessor")
     private lateinit var otherMenuAccessor: OtherMenuAccessor
 
