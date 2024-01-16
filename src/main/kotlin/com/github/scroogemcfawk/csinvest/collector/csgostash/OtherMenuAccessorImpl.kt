@@ -15,7 +15,13 @@ class OtherMenuAccessorImpl : OtherMenuAccessor {
     @Resource(name = "homePage")
     private lateinit var homePage: Document
 
+    private var cache: HashMap<OtherMenuSection, Elements>? = null
+
     override fun getSections(): HashMap<OtherMenuSection, Elements> {
+        return cache ?: getFromMarkup()
+    }
+
+    private fun getFromMarkup(): HashMap<OtherMenuSection, Elements> {
         val splitByDivider = fetchOtherMenu()?.let { bar ->
             fetchSectionsFromMenu(bar)
         }
@@ -37,6 +43,8 @@ class OtherMenuAccessorImpl : OtherMenuAccessor {
                 sections[k] = it[v]
             }
         } ?: log.debug("Unexpected empty section list in other drop down menu.")
+
+        cache = sections
 
         return sections
     }
