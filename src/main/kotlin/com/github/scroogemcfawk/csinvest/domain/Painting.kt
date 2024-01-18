@@ -1,5 +1,7 @@
 package com.github.scroogemcfawk.csinvest.domain
 
+import com.github.scroogemcfawk.csinvest.utils.normalizeItemString
+
 
 class Painting(
     name: String,
@@ -12,37 +14,58 @@ class Painting(
     override val builder: PaintingBuilder
         get() = PaintingBuilder().withName(name).withRarity(rarity).withBase(base).withCategory(category).withExterior(exterior)
 
+
+    override fun toString(): String {
+        return "Painting(name=$name, rarity=$rarity, base=$base, category=$category, exterior=$exterior)"
+    }
+
 }
 
 
 class PaintingBuilder : ItemBuilder() {
 
+    var base: Base = UndefinedBase.UNDEFINED
+    var category: Category = Category.UNDEFINED
+    var exterior: Exterior = Exterior.UNDEFINED
+
     override fun withName(name: String): PaintingBuilder {
-        TODO("Not yet implemented")
+        return super.withName(name) as PaintingBuilder
     }
 
     override fun withRarity(rarity: Rarity): PaintingBuilder {
-        TODO("Not yet implemented")
+        return super.withRarity(rarity) as PaintingBuilder
     }
 
     fun withBase(base: Base): PaintingBuilder {
-        TODO("Not yet implemented")
+        val new = this.copy()
+        new.base = base
+        return new
     }
 
     fun withCategory(category: Category): PaintingBuilder {
-        TODO("Not yet implemented")
+        val new = this.copy()
+        new.category = category
+        return new
     }
 
     fun withExterior(exterior: Exterior): PaintingBuilder {
-        TODO("Not yet implemented")
+        val new = this.copy()
+        new.exterior = exterior
+        return new
     }
 
-    override fun build(): Item {
-        TODO("Not yet implemented")
+    override fun build(): Painting {
+        return Painting(name, rarity, base, category, exterior)
     }
 
-    override fun copy(): ItemBuilder {
-        TODO("Not yet implemented")
+    override fun copy(): PaintingBuilder {
+        val copy = PaintingBuilder()
+        copy.name = name
+        copy.rarity = rarity
+        copy.base = base
+        copy.category = category
+        copy.exterior = exterior
+        return copy
     }
 
 }
@@ -51,7 +74,32 @@ class PaintingBuilder : ItemBuilder() {
 /**
  * Marker interface for painting Base enums
  */
-interface Base
+interface Base {
+    // don't ask
+    companion object {
+        fun valueOf(s: String): Base {
+            val normalized = normalizeName(s)
+            try {
+                return Weapon.valueOf(normalized)
+            } catch (_: Exception) {}
+            try {
+                return Knife.valueOf(normalized)
+            } catch (_: Exception) {}
+            try {
+                return Gloves.valueOf(normalized)
+            } catch (_: Exception) {}
+            return UndefinedBase.UNDEFINED
+        }
+
+        private fun normalizeName(s: String): String {
+            return normalizeItemString(s).removeSuffix("KNIFE").removeSuffix("GLOVES").removeSuffix("_")
+        }
+    }
+}
+
+enum class UndefinedBase : Base {
+    UNDEFINED;
+}
 
 enum class Weapon : Base {
     AK_47,
@@ -112,10 +160,23 @@ enum class Knife : Base {
     URSUS,
 }
 
+enum class Gloves : Base {
+    BLOODHOUND,
+    BROKEN_FANG,
+    DRIVER,
+    HAND_WRAPS,
+    HYDRA,
+    MOTO,
+    SPECIALIST,
+    SPORT,
+}
+
 enum class Category {
     NORMAL,
     STATTRAK,
-    SOUVENIR
+    SOUVENIR,
+
+    UNDEFINED;
 }
 
 enum class Exterior {
@@ -124,5 +185,7 @@ enum class Exterior {
     FIELD_TESTED,
     WELL_WORN,
     BATTLE_SCARRED,
-    NOT_PAINTED
+    NOT_PAINTED,
+
+    UNDEFINED;
 }
