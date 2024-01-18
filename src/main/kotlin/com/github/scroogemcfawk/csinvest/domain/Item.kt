@@ -1,7 +1,7 @@
 package com.github.scroogemcfawk.csinvest.domain
 
 abstract class Item(
-    val name: String,
+    val name: String, // TODO make a dynamic field
     val rarity: Rarity
 ) {
 
@@ -18,9 +18,17 @@ abstract class ItemBuilder {
     var name: String = ""
     var rarity: Rarity = Rarity.UNDEFINED
 
-    abstract fun withName(name: String): ItemBuilder
+    open fun withName(name: String): ItemBuilder {
+        val new = this.copy()
+        new.name = name
+        return new
+    }
 
-    abstract fun withRarity(rarity: Rarity): ItemBuilder
+    open fun withRarity(rarity: Rarity): ItemBuilder {
+        val new = this.copy()
+        new.rarity = rarity
+        return new
+    }
 
     abstract fun build(): Item
 

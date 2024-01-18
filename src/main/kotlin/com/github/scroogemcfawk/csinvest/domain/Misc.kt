@@ -22,15 +22,11 @@ class MiscBuilder: ItemBuilder() {
     var type = MiscType.UNDEFINED
 
     override fun withName(name: String): MiscBuilder {
-        val new = this.copy()
-        new.name = name
-        return new
+        return super.withName(name) as MiscBuilder
     }
 
     override fun withRarity(rarity: Rarity): MiscBuilder {
-        val new = this.copy()
-        new.rarity = rarity
-        return new
+        return super.withRarity(rarity) as MiscBuilder
     }
 
     fun withType(type: MiscType): MiscBuilder {

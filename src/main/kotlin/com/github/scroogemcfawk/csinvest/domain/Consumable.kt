@@ -21,15 +21,11 @@ class ConsumableBuilder: ItemBuilder() {
     var type = ConsumableType.UNDEFINED
 
     override fun withName(name: String): ConsumableBuilder {
-        val new = this.copy()
-        new.name = name
-        return new
+        return super.withName(name) as ConsumableBuilder
     }
 
     override fun withRarity(rarity: Rarity): ConsumableBuilder {
-        val new = this.copy()
-        new.rarity = rarity
-        return new
+        return super.withRarity(rarity) as ConsumableBuilder
     }
 
     fun withType(type: ConsumableType): ConsumableBuilder {

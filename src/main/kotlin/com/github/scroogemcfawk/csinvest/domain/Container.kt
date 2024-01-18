@@ -21,15 +21,11 @@ class ContainerBuilder: ItemBuilder() {
     var type = ContainerType.UNDEFINED
 
     override fun withName(name: String): ContainerBuilder {
-        val new = this.copy()
-        new.name = name
-        return new
+        return super.withName(name) as ContainerBuilder
     }
 
     override fun withRarity(rarity: Rarity): ContainerBuilder {
-        val new = this.copy()
-        new.rarity = rarity
-        return new
+        return super.withRarity(rarity) as ContainerBuilder
     }
 
     fun withType(type: ContainerType): ContainerBuilder {
