@@ -45,4 +45,10 @@ open class CollectorConfig {
         return MiscCollector()
     }
 
+    @Lazy
+    @Bean(name = ["paintingCollector"])
+    open fun paintingCollector(): PaintingCollector {
+        return PaintingCollector()
+    }
+
 }

@@ -4,7 +4,6 @@ import com.github.scroogemcfawk.csinvest.collector.ItemCollector
 import com.github.scroogemcfawk.csinvest.domain.*
 import jakarta.annotation.Resource
 import org.slf4j.LoggerFactory
-import org.slf4j.event.Level
 
 
 /**
@@ -23,26 +22,26 @@ class CompleteCollector: ItemCollector {
     @Resource(name = "miscCollector")
     private lateinit var miscCollector: MiscCollector
 
-    init {
-        log.atLevel(Level.DEBUG)
-    }
+    @Resource(name = "paintingCollector")
+    private lateinit var paintingCollector: PaintingCollector
 
     override fun getAll(): ArrayList<Item> {
         val items = ArrayList<Item>()
 
-//        items.addAll(getContainers())
-//        items.addAll(getConsumables())
+        log.info("Get all items started.")
 
+        items.addAll(getContainers())
+        items.addAll(getConsumables())
         items.addAll(getMisc())
+        items.addAll(getPaintings())
 
-//        items.addAll(getPaintings())
+        log.info("Get all items complete.")
 
         return items
     }
 
     override fun getPaintings(): ArrayList<Painting> {
-        // TODO("Not yet implemented")
-        return ArrayList()
+        return paintingCollector.get()
     }
 
     override fun getContainers(): ArrayList<Container> {
