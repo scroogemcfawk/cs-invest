@@ -35,23 +35,38 @@ class PaintingCollector {
     }
 
     private fun getPistols(): ArrayList<Painting> {
-        return fetchPaintingsFromDropDownMenu("Pistols")
+        log.info("Get pistols started.")
+        val res = fetchPaintingsFromDropDownMenu("Pistols")
+        log.info("Get pistols complete.")
+        return res
     }
 
     private fun getMidTier(): ArrayList<Painting> {
-        return fetchPaintingsFromDropDownMenu("Mid-Tier")
+        log.info("Get mid-tier started.")
+        val res = fetchPaintingsFromDropDownMenu("Mid-Tier")
+        log.info("Get mid-tier started.")
+        return res
     }
 
     private fun getRifles(): ArrayList<Painting> {
-        return fetchPaintingsFromDropDownMenu("Rifles")
+        log.info("Get rifles started.")
+        val res = fetchPaintingsFromDropDownMenu("Rifles")
+        log.info("Get rifles complete.")
+        return res
     }
 
     private fun getKnives(): ArrayList<Painting> {
-        return getItemFromBasePage("https://csgostash.com/skin-rarity/Knife")
+        log.info("Get knives started.")
+        val res = getItemFromBasePage("https://csgostash.com/skin-rarity/Knife")
+        log.info("Get knives complete.")
+        return res
     }
 
     private fun getGloves(): ArrayList<Painting> {
-        return getItemFromBasePage("https://csgostash.com/gloves")
+        log.info("Get gloves started.")
+        val res = getItemFromBasePage("https://csgostash.com/gloves")
+        log.info("Get gloves complete.")
+        return res
     }
 
     private fun fetchPaintingsFromDropDownMenu(menuName: String): ArrayList<Painting> {
@@ -67,13 +82,23 @@ class PaintingCollector {
     }
 
     private fun getItemFromBasePage(pageUrl: String): ArrayList<Painting> {
-        val tiles = SectionScraper(pageUrl).get()
         val res = ArrayList<Painting>()
+
+        val tiles = try {
+            SectionScraper(pageUrl).get()
+        } catch (e: Exception) {
+            log.warn("Could not get page {}", pageUrl)
+            return res
+        }
 
         for (t in tiles) {
             val url = t.select("a:has(img)").attr("href")
             if (url.isBlank()) continue
-            res += getItemFromSkinPage(url)
+            try {
+                res += getItemFromSkinPage(url)
+            } catch (e: Exception) {
+                log.warn("Could not get item from skin page {}", url)
+            }
         }
 
         return res
