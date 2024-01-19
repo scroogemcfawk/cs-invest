@@ -21,9 +21,14 @@ class ContainerCollector {
 
     fun get(): ArrayList<Container> {
         val containers = ArrayList<Container>()
-        containers.addAll(
-            fetchContainersFromNavigationPage() + fetchContainersFromOtherMenu()
-        )
+
+        log.info("Get containers started.")
+
+        containers += fetchContainersFromNavigationPage()
+        containers += fetchContainersFromOtherMenu()
+
+        log.info("Get containers complete.")
+
         return containers
     }
 
@@ -121,9 +126,10 @@ class ContainerCollector {
     }
 
     private fun fetchMusicKitBoxes(prototype: ContainerBuilder, music: Elements): ArrayList<Container> {
+        log.info("Get music kit boxes started.")
         log.debug("Fetching MUSIC_KIT_BOX Containers")
 
-        val containers = ArrayList<Container>()
+        val musicKitBoxes = ArrayList<Container>()
 
         // using prototype so it doesn't change outside of function
         val containerBuilder = prototype.withType(ContainerType.MUSIC_KIT_BOX)
@@ -131,7 +137,7 @@ class ContainerCollector {
         for (element in music) {
             element.selectFirst("a")?.let { a ->
                 if ("Kits" !in a.text()) {
-                    containers.add(
+                    musicKitBoxes.add(
                         containerBuilder.withName(
                             Jsoup.connect(a.attr("href")).get().select("h1.margin-top-sm").text()
                         ).build()
@@ -142,13 +148,16 @@ class ContainerCollector {
             }
         }
 
-        return containers
+        log.info("Get music kit boxes complete.")
+
+        return musicKitBoxes
     }
 
     private fun fetchPatchPacks(prototype: ContainerBuilder, patch: Elements): ArrayList<Container> {
+        log.info("Get patch packs started.")
         log.debug("Fetching PATCH_PACK Containers")
 
-        val containers = ArrayList<Container>()
+        val patchPacks = ArrayList<Container>()
 
         // using prototype so it doesn't change outside of function
         val containerBuilder = prototype.withType(ContainerType.PATCH_PACK)
@@ -156,7 +165,7 @@ class ContainerCollector {
         for (element in patch) {
             element.selectFirst("a")?.let { a ->
                 if ("Pack" in a.text()) {
-                    containers.add(
+                    patchPacks.add(
                         containerBuilder.withName(
                             Jsoup.connect(a.attr("href")).get().select("h1.margin-top-sm").text()
                         ).build()
@@ -167,13 +176,16 @@ class ContainerCollector {
             }
         }
 
-        return containers
+        log.info("Get patch packs complete.")
+
+        return patchPacks
     }
 
     private fun fetchPinPacks(prototype: ContainerBuilder, pin: Elements): ArrayList<Container> {
+        log.info("Get pin packs started.")
         log.debug("Fetching PIN_PACK Containers")
 
-        val containers = ArrayList<Container>()
+        val pinPacks = ArrayList<Container>()
 
         // using prototype so it doesn't change outside of function
         val containerBuilder = prototype.withType(ContainerType.PIN_PACK)
@@ -181,7 +193,7 @@ class ContainerCollector {
         for (element in pin) {
             element.selectFirst("a")?.let { a ->
                 if ("Collectable" !in a.text()) {
-                    containers.add(
+                    pinPacks.add(
                         containerBuilder.withName(
                             Jsoup.connect(a.attr("href")).get().select("h1.margin-top-sm").text()
                         ).build()
@@ -192,13 +204,16 @@ class ContainerCollector {
             }
         }
 
-        return containers
+        log.info("Get pin packs complete.")
+
+        return pinPacks
     }
 
     private fun fetchGraffitiBoxes(prototype: ContainerBuilder, graffiti: Elements): ArrayList<Container> {
+        log.info("Get graffiti boxes started.")
         log.debug("Fetching GRAFFITI_BOX Containers")
 
-        val containers = ArrayList<Container>()
+        val graffitiBoxes = ArrayList<Container>()
 
         // using prototype so it doesn't change outside of function
         val containerBuilder = prototype.withType(ContainerType.GRAFFITI_BOX)
@@ -206,7 +221,7 @@ class ContainerCollector {
         for (element in graffiti) {
             element.selectFirst("a")?.let { a ->
                 if ("Box" in a.text()) {
-                    containers.add(
+                    graffitiBoxes.add(
                         containerBuilder.withName(
                             Jsoup.connect(a.attr("href")).get().select("h1.margin-top-sm").text()
                         ).build()
@@ -217,28 +232,33 @@ class ContainerCollector {
             }
         }
 
-        return containers
+        log.info("Get graffiti boxes complete.")
+
+        return graffitiBoxes
     }
 
     private fun fetchContainersFromOtherPage(other: Elements): ArrayList<Container> {
+        log.info("Get other page capsules started.")
         log.debug("Fetching other STICKER_CAPSULE Containers")
 
-        val containers = ArrayList<Container>()
+        val otherPageCapsules = ArrayList<Container>()
 
         if (other.size != 1) {
             log.warn("Unexpected section size found.")
-            return containers
+            return otherPageCapsules
         }
 
         other[0].selectFirst("a")?.let { a ->
-            containers.addAll(
+            otherPageCapsules.addAll(
                 fetchContainersFromPages(a.attr("href")).filter { "ESL Cologne 2014" in it.name }
             )
         } ?: {
             log.warn("'a' not found.")
         }
 
-        return containers
+        log.info("Get other page capsules complete.")
+
+        return otherPageCapsules
     }
 
 }
