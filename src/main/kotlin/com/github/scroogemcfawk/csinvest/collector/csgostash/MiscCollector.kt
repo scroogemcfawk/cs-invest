@@ -16,15 +16,22 @@ class MiscCollector {
     fun get(): ArrayList<Misc> {
         val misc = ArrayList<Misc>()
 
+        log.info("Get misc started.")
+
         misc += getAgents()
         misc += getMusicKits()
         misc += getCollectibles()
         misc += getTagsAndTools()
 
+        log.info("Get misc complete.")
+
         return misc
     }
 
     private fun getAgents(): ArrayList<Misc> {
+
+        log.info("Get agents started.")
+
         val agents = ArrayList<Misc>()
 
         val agentPageUrl = "https://csgostash.com/agents"
@@ -34,10 +41,15 @@ class MiscCollector {
 
         agents += fetchMiscFromTiles(tiles, agentBuilder)
 
+        log.info("Get agents complete.")
+
         return agents
     }
 
     private fun getMusicKits(): ArrayList<Misc> {
+
+        log.info("Get music kits started.")
+
         val musicKits = ArrayList<Misc>()
 
         val musicPageUrl = "https://csgostash.com/music"
@@ -53,10 +65,15 @@ class MiscCollector {
             musicKits.add(blank.build())
         }
 
+        log.info("Get music kits complete.")
+
         return musicKits
     }
 
     private fun getCollectibles(): ArrayList<Misc> {
+
+        log.info("Get collectibles started.")
+
         val collectibles = ArrayList<Misc>()
 
         val collectiblePageUrl = "https://csgostash.com/pins"
@@ -66,10 +83,15 @@ class MiscCollector {
 
         collectibles += fetchMiscFromTiles(tiles, collectibleBuilder)
 
+        log.info("Get collectibles complete.")
+
         return collectibles
     }
 
     private fun getTagsAndTools(): ArrayList<Misc> {
+
+        log.info("Get tags and tools started.")
+
         val tagsAndTools = ArrayList<Misc>()
 
         val keysAndOtherPageUrl = "https://csgostash.com/items"
@@ -89,6 +111,8 @@ class MiscCollector {
                 else -> continue
             }
         }
+
+        log.info("Get tags and tools complete.")
 
         return tagsAndTools
     }
