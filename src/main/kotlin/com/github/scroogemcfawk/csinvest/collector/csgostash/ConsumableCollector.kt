@@ -24,14 +24,22 @@ class ConsumableCollector {
     fun get(): ArrayList<Consumable> {
         val consumables = ArrayList<Consumable>()
 
-        consumables.addAll(
-            fetchStickers() + fetchPatches() + fetchGraffities() + fetchKeysAndPasses()
-        )
+        log.info("Get consumables started.")
+
+        consumables += fetchStickers()
+        consumables += fetchPatches()
+        consumables += fetchGraffities()
+        consumables += fetchKeysAndPasses()
+
+        log.info("Get consumables complete.")
 
         return consumables
     }
 
     private fun fetchStickers(): ArrayList<Consumable> {
+
+        log.info("Get stickers started.")
+
         val stickers = ArrayList<Consumable>()
 
         val regularStickerPageUrl = "https://csgostash.com/stickers/regular"
@@ -40,10 +48,15 @@ class ConsumableCollector {
         stickers += fetchStickersFromUrl(regularStickerPageUrl)
         stickers += fetchStickersFromUrl(tournamentStickerPageUrl)
 
+        log.info("Get stickers complete.")
+
         return stickers
     }
 
     private fun fetchPatches(): ArrayList<Consumable> {
+
+        log.info("Get patches started.")
+
         val patches = ArrayList<Consumable>()
         val menu = otherMenuAccessor.getSections()
 
@@ -65,10 +78,15 @@ class ConsumableCollector {
             if (p.rarity == Rarity.UNDEFINED) log.warn("Unexpected UNDEFINED patch rarity found.")
         }
 
+        log.info("Get patches complete.")
+
         return patches
     }
 
     private fun fetchGraffities(): ArrayList<Consumable> {
+
+        log.info("Get graffiti started.")
+
         val graffiti = ArrayList<Consumable>()
         val menu = otherMenuAccessor.getSections()
 
@@ -87,10 +105,15 @@ class ConsumableCollector {
             if (g.rarity == Rarity.UNDEFINED) log.warn("Unexpected UNDEFINED graffiti rarity found.")
         }
 
+        log.info("Get graffiti complete.")
+
         return graffiti
     }
 
     private fun fetchKeysAndPasses(): ArrayList<Consumable> {
+
+        log.info("Get keys and passes started.")
+
         val keysAndPasses = ArrayList<Consumable>()
 
         val menu = otherMenuAccessor.getSections()
@@ -119,6 +142,8 @@ class ConsumableCollector {
             }
             keysAndPasses.add(prototype.withRarity(Rarity.COMMON).build())
         }
+
+        log.info("Get keys and passes complete.")
 
         return keysAndPasses
     }
