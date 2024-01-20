@@ -6,7 +6,7 @@ import com.github.scroogemcfawk.csinvest.domain.Rarity
 import org.springframework.data.relational.core.mapping.Table
 
 
-@Table("Consumable")
+@Table("csi_consumable")
 class ConsumableEntity(
     id: Long = 0L,
     name: String,

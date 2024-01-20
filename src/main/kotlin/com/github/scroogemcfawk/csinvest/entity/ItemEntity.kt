@@ -7,7 +7,7 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
 
 
-@Table("Item")
+@Table("csi_item")
 open class ItemEntity(
     id: Long = 0L,
     var name: String,
