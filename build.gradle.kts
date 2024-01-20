@@ -21,6 +21,11 @@ dependencies {
     implementation("org.jsoup:jsoup:1.16.2")
 
     implementation("org.springframework.boot:spring-boot-starter")
+    implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
+
+    implementation("org.postgresql:postgresql:42.7.1")
+
+    implementation(kotlin("reflect")) // makes spring data create repository
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core")
 
