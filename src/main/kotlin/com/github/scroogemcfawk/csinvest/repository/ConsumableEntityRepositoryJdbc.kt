@@ -24,7 +24,7 @@ open class ConsumableEntityRepositoryJdbc : ConsumableEntityRepository {
     @Autowired
     lateinit var itemRepo: ItemEntityRepository
 
-    private val rowMapper = RowMapper { rs: ResultSet, _: Int ->
+    override val rowMapper = RowMapper { rs: ResultSet, _: Int ->
         return@RowMapper ConsumableEntity(
             rs.getLong(1),
             rs.getString(2),

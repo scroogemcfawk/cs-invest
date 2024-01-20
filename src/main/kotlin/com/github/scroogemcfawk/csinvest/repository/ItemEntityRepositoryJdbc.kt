@@ -20,7 +20,7 @@ open class ItemEntityRepositoryJdbc: ItemEntityRepository {
     @Autowired
     private lateinit var jdbcTemplate: JdbcTemplate
 
-    private val rowMapper = RowMapper { rs: ResultSet, _: Int ->
+    override val rowMapper = RowMapper { rs: ResultSet, _: Int ->
         return@RowMapper ItemEntity(
             rs.getLong(1), rs.getString(2), Rarity.valueOf(rs.getString(3) ?: Rarity.UNDEFINED.toString())
         )
