@@ -38,9 +38,9 @@ open class ConsumableEntityRepositoryJdbc : ConsumableEntityRepository {
         createConsumableTypeType()
 
         jdbcTemplate.execute(
-            "CREATE TABLE IF NOT EXISTS Consumable(" +
+            "CREATE TABLE IF NOT EXISTS csi_consumable (" +
                     "id BIGINT PRIMARY KEY, " +
-                    "type consumable_type" +
+                    "type csi_consumable_enum" +
                     ")"
         )
 
@@ -49,10 +49,10 @@ open class ConsumableEntityRepositoryJdbc : ConsumableEntityRepository {
     private fun createConsumableTypeType() {
         try {
             jdbcTemplate.execute(
-                "CREATE TYPE consumable_type AS ENUM (${ConsumableType.entries.joinToString(", ") { "'$it'" }})"
+                "CREATE TYPE csi_consumable_enum AS ENUM (${ConsumableType.entries.joinToString(", ") { "'$it'" }})"
             )
         } catch (e: Exception) {
-            log.debug("Error creating consumable_type type: {}", e.message)
+            log.debug("Error creating csi_consumable_enum type: {}", e.message)
         }
     }
 
@@ -62,13 +62,13 @@ open class ConsumableEntityRepositoryJdbc : ConsumableEntityRepository {
         if (item.id == 0L) {
             itemRepo.save(item as ItemEntity)
             jdbcTemplate.update(
-                "INSERT INTO Consumable (id, type) VALUES (?, CAST(? as consumable_type))",
+                "INSERT INTO csi_consumable (id, type) VALUES (?, CAST(? as csi_consumable_enum))",
                 item.id, item.type.toString()
             )
         } else {
             itemRepo.save(item as ItemEntity)
             jdbcTemplate.update(
-                "UPDATE Consumable SET type = CAST(? as consumable_type) WHERE id = ?",
+                "UPDATE csi_consumable SET type = CAST(? as csi_consumable_enum) WHERE id = ?",
                 item.type.toString(), item.id
             )
         }
@@ -76,6 +76,9 @@ open class ConsumableEntityRepositoryJdbc : ConsumableEntityRepository {
     }
 
     override fun findAll(): Iterable<ConsumableEntity> {
-        return jdbcTemplate.query("select item.id, name, rarity, type from item inner join consumable on item.id = consumable.id", rowMapper)
+        return jdbcTemplate.query(
+            "select csi_item.id, name, rarity, type from csi_item inner join csi_consumable on csi_item.id = csi_consumable.id"
+            , rowMapper
+        )
     }
 }

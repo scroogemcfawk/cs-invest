@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository
 import java.sql.ResultSet
 
 
+
 @Repository
 open class ItemEntityRepositoryJdbc: ItemEntityRepository {
 
@@ -30,10 +31,10 @@ open class ItemEntityRepositoryJdbc: ItemEntityRepository {
         createRarityType()
 
         jdbcTemplate.execute(
-            "CREATE TABLE IF NOT EXISTS Item(" +
+            "CREATE TABLE IF NOT EXISTS csi_item (" +
             "id BIGINT PRIMARY KEY, " +
             "name VARCHAR(128), " +
-            "rarity Rarity" +
+            "rarity csi_rarity_enum" +
             ")"
         )
 
@@ -44,37 +45,37 @@ open class ItemEntityRepositoryJdbc: ItemEntityRepository {
         // lgtm, because it's enum propagation
         try {
             jdbcTemplate.execute(
-                "CREATE TYPE Rarity AS ENUM (${Rarity.entries.joinToString(", ") { "'$it'" }})"
+                "CREATE TYPE csi_rarity_enum AS ENUM (${Rarity.entries.joinToString(", ") { "'$it'" }})"
             )
         } catch (e: Exception) {
-            log.debug("Error creating Rarity type: {}", e.message)
+            log.debug("Error creating csi_rarity_enum type: {}", e.message)
         }
     }
 
     private fun createItemSequence() {
-        jdbcTemplate.execute("CREATE SEQUENCE IF NOT EXISTS Item_Id_Seq START WITH 1 OWNED BY Item.id")
+        jdbcTemplate.execute("CREATE SEQUENCE IF NOT EXISTS csi_item_id_seq START WITH 1 OWNED BY csi_item.id")
     }
 
     override fun save(item: ItemEntity) {
         if (item.id != 0L) {
             jdbcTemplate.update(
-                "UPDATE Item SET name = ?, rarity = CAST(? as Rarity) WHERE id = ?",
+                "UPDATE csi_item SET name = ?, rarity = CAST(? as csi_rarity_enum) WHERE id = ?",
                 item.name, item.rarity.toString(), item.id
             )
             return
         }
 
-        jdbcTemplate.query("SELECT nextval('Item_Id_Seq')") { rs ->
+        jdbcTemplate.query("SELECT nextval('csi_item_id_seq')") { rs ->
             item.overrideId(rs.getLong(1))
         }
         jdbcTemplate.update(
-            "INSERT INTO Item (id, name, rarity) VALUES (?, ?, CAST(? as Rarity))",
+            "INSERT INTO csi_item (id, name, rarity) VALUES (?, ?, CAST(? as csi_rarity_enum))",
             item.id, item.name, item.rarity.toString()
         )
     }
 
     override fun findAll(): Iterable<ItemEntity> {
-        return jdbcTemplate.query("SELECT * FROM Item", rowMapper)
+        return jdbcTemplate.query("SELECT * FROM csi_item", rowMapper)
     }
 
 }
