@@ -3,7 +3,6 @@ package com.github.scroogemcfawk.csinvest.repository
 import com.github.scroogemcfawk.csinvest.domain.*
 import com.github.scroogemcfawk.csinvest.entity.ItemEntity
 import com.github.scroogemcfawk.csinvest.entity.PaintingEntity
-import jakarta.annotation.PostConstruct
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
@@ -34,20 +33,32 @@ open class PaintingEntityRepositoryJdbc: PaintingEntityRepository {
         )
     }
 
-    @PostConstruct
-    private fun createTable() {
+    override val tableName = "csi_painting"
+    private val baseEnum = "csi_base_enum"
+    private val categoryEnum = "csi_category_enum"
+    private val exteriorEnum = "csi_exterior_enum"
+
+
+    override fun setup() {
 
         createCategoryTypeType()
         createExteriorTypeType()
         createBaseTypeType()
 
         jdbcTemplate.execute(
-            "CREATE TABLE IF NOT EXISTS csi_painting (" +
-                    "id BIGINT PRIMARY KEY, " +
-                    "base csi_base_enum, " +
-                    "category csi_category_enum, " +
-                    "exterior csi_exterior_enum" +
-                    ")"
+            """
+            CREATE TABLE IF NOT EXISTS 
+            $tableName (
+                id BIGINT PRIMARY KEY, 
+                base $baseEnum, 
+                category $categoryEnum, 
+                exterior $exteriorEnum,
+
+                CONSTRAINT fk_item 
+                    FOREIGN KEY (id)
+                        REFERENCES ${itemRepo.tableName} (id) 
+            )
+            """.trimIndent()
         )
 
     }
@@ -55,20 +66,20 @@ open class PaintingEntityRepositoryJdbc: PaintingEntityRepository {
     private fun createCategoryTypeType() {
         try {
             jdbcTemplate.execute(
-                "CREATE TYPE csi_category_enum AS ENUM (${Category.entries.joinToString(", ") { "'$it'" }})"
+                "CREATE TYPE $categoryEnum AS ENUM (${Category.entries.joinToString(", ") { "'$it'" }})"
             )
         } catch (e: Exception) {
-            log.debug("Error creating csi_category_enum type: {}", e.message)
+            log.debug("Error creating $categoryEnum type: {}", e.message)
         }
     }
 
     private fun createExteriorTypeType() {
         try {
             jdbcTemplate.execute(
-                "CREATE TYPE csi_exterior_enum AS ENUM (${Exterior.entries.joinToString(", ") { "'$it'" }})"
+                "CREATE TYPE $exteriorEnum AS ENUM (${Exterior.entries.joinToString(", ") { "'$it'" }})"
             )
         } catch (e: Exception) {
-            log.debug("Error creating csi_exterior_enum type: {}", e.message)
+            log.debug("Error creating $exteriorEnum type: {}", e.message)
         }
     }
 
@@ -83,10 +94,10 @@ open class PaintingEntityRepositoryJdbc: PaintingEntityRepository {
             val baseAggregation = (undefinedBase + weaponBase + knifeBase + gloveBase) as List<Base>
 
             jdbcTemplate.execute(
-                "CREATE TYPE csi_base_enum AS ENUM (${baseAggregation.joinToString(", ") { "'$it'" }})"
+                "CREATE TYPE $baseEnum AS ENUM (${baseAggregation.joinToString(", ") { "'$it'" }})"
             )
         } catch (e: Exception) {
-            log.debug("Error creating csi_base_enum type: {}", e.message)
+            log.debug("Error creating $baseEnum type: {}", e.message)
         }
     }
 
@@ -94,17 +105,17 @@ open class PaintingEntityRepositoryJdbc: PaintingEntityRepository {
         if (item.id == 0L) {
             itemRepo.save(item as ItemEntity)
             jdbcTemplate.update(
-                "INSERT INTO csi_painting (id, base, category, exterior) " +
-                "VALUES (?, CAST(? as csi_base_enum), CAST(? as csi_category_enum), CAST(? as csi_exterior_enum))",
+                "INSERT INTO $tableName (id, base, category, exterior) " +
+                "VALUES (?, CAST(? as $baseEnum), CAST(? as $categoryEnum), CAST(? as $exteriorEnum))",
                 item.id, item.base.toString(), item.category.toString(), item.exterior.toString()
             )
         } else {
             itemRepo.save(item as ItemEntity)
             jdbcTemplate.update(
-                "UPDATE csi_painting SET " +
-                "base = CAST(? as csi_base_enum), " +
-                "category = CAST(? as csi_category_enum), " +
-                "exterior = CAST(? as csi_exterior_enum) " +
+                "UPDATE $tableName SET " +
+                "base = CAST(? as $baseEnum), " +
+                "category = CAST(? as $categoryEnum), " +
+                "exterior = CAST(? as $exteriorEnum) " +
                 "WHERE id = ?",
                 item.base.toString(),
                 item.category.toString(),
@@ -114,10 +125,27 @@ open class PaintingEntityRepositoryJdbc: PaintingEntityRepository {
         }
     }
 
+    override fun delete(id: Long) {
+        jdbcTemplate.execute("""
+            DELETE from $tableName WHERE id = $id
+        """.trimIndent())
+        jdbcTemplate.execute("""
+            DELETE from ${itemRepo.tableName} WHERE id = $id
+        """.trimIndent())
+    }
+
     override fun findAll(): Iterable<PaintingEntity> {
         return jdbcTemplate.query(
-            "select csi_item.id, name, rarity, base, category, exterior from csi_item inner join csi_painting on csi_item.id = csi_painting.id",
+            "select ${itemRepo.tableName}.id, name, rarity, base, category, exterior from ${itemRepo.tableName} inner join $tableName on ${itemRepo.tableName}.id = $tableName.id",
             rowMapper
         )
     }
+
+    override fun drop() {
+        jdbcTemplate.execute("DROP TABLE IF EXISTS $tableName")
+        jdbcTemplate.execute("DROP TYPE IF EXISTS $baseEnum")
+        jdbcTemplate.execute("DROP TYPE IF EXISTS $categoryEnum")
+        jdbcTemplate.execute("DROP TYPE IF EXISTS $exteriorEnum")
+    }
+
 }

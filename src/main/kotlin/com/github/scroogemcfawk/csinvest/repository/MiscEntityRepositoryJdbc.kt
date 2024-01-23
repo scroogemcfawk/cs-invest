@@ -4,7 +4,6 @@ import com.github.scroogemcfawk.csinvest.domain.MiscType
 import com.github.scroogemcfawk.csinvest.domain.Rarity
 import com.github.scroogemcfawk.csinvest.entity.ItemEntity
 import com.github.scroogemcfawk.csinvest.entity.MiscEntity
-import jakarta.annotation.PostConstruct
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
@@ -34,15 +33,26 @@ open class MiscEntityRepositoryJdbc : MiscEntityRepository {
 
     }
 
-    @PostConstruct
-    private fun createTable() {
+    override val tableName = "csi_misc"
+    private val miscEnum = "csi_misc_enum"
+
+
+    override fun setup() {
         createMiscTypeType()
 
         jdbcTemplate.execute(
-            "CREATE TABLE IF NOT EXISTS csi_misc (" +
-                    "id BIGINT PRIMARY KEY, " +
-                    "type csi_misc_enum" +
-                    ")"
+            """
+            CREATE TABLE IF NOT EXISTS 
+            $tableName (
+            
+                id BIGINT PRIMARY KEY, 
+                type $miscEnum,
+                
+                CONSTRAINT fk_item 
+                    FOREIGN KEY (id)
+                        REFERENCES ${itemRepo.tableName} (id) 
+            )
+            """.trimIndent()
         )
 
     }
@@ -50,10 +60,10 @@ open class MiscEntityRepositoryJdbc : MiscEntityRepository {
     private fun createMiscTypeType() {
         try {
             jdbcTemplate.execute(
-                "CREATE TYPE csi_misc_enum AS ENUM (${MiscType.entries.joinToString(", ") { "'$it'" }})"
+                "CREATE TYPE $miscEnum AS ENUM (${MiscType.entries.joinToString(", ") { "'$it'" }})"
             )
         } catch (e: Exception) {
-            log.debug("Error creating csi_misc_enum type: {}", e.message)
+            log.debug("Error creating $miscEnum type: {}", e.message)
         }
     }
 
@@ -62,23 +72,38 @@ open class MiscEntityRepositoryJdbc : MiscEntityRepository {
         if (item.id == 0L) {
             itemRepo.save(item as ItemEntity)
             jdbcTemplate.update(
-                "INSERT INTO csi_misc (id, type) VALUES (?, CAST(? as csi_misc_enum))",
+                "INSERT INTO csi_misc (id, type) VALUES (?, CAST(? as $miscEnum))",
                 item.id, item.type.toString()
             )
         } else {
             itemRepo.save(item as ItemEntity)
             jdbcTemplate.update(
-                "UPDATE csi_misc SET type = CAST(? as csi_misc_enum) WHERE id = ?",
+                "UPDATE csi_misc SET type = CAST(? as $miscEnum) WHERE id = ?",
                 item.type.toString(), item.id
             )
         }
 
     }
 
+    override fun delete(id: Long) {
+        jdbcTemplate.execute("""
+            DELETE from $tableName WHERE id = $id
+        """.trimIndent())
+        jdbcTemplate.execute("""
+            DELETE from ${itemRepo.tableName} WHERE id = $id
+        """.trimIndent())
+    }
+
     override fun findAll(): Iterable<MiscEntity> {
         return jdbcTemplate.query(
-            "select csi_item.id, name, rarity, type from csi_item inner join csi_misc on csi_item.id = csi_misc.id",
+            "select ${itemRepo.tableName}.id, name, rarity, type from ${itemRepo.tableName} inner join $tableName on ${itemRepo.tableName}.id = $tableName.id",
             rowMapper
         )
     }
+
+    override fun drop() {
+        jdbcTemplate.execute("DROP TABLE IF EXISTS $tableName")
+        jdbcTemplate.execute("DROP TYPE IF EXISTS $miscEnum")
+    }
+
 }

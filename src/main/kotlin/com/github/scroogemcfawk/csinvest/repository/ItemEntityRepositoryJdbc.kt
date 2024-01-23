@@ -2,14 +2,12 @@ package com.github.scroogemcfawk.csinvest.repository
 
 import com.github.scroogemcfawk.csinvest.domain.Rarity
 import com.github.scroogemcfawk.csinvest.entity.ItemEntity
-import jakarta.annotation.PostConstruct
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.RowMapper
 import org.springframework.stereotype.Repository
 import java.sql.ResultSet
-
 
 
 @Repository
@@ -26,16 +24,25 @@ open class ItemEntityRepositoryJdbc: ItemEntityRepository {
         )
     }
 
-    @PostConstruct
-    private fun createTable() {
+    override val tableName = "csi_item"
+    private val rarityEnum = "csi_rarity_enum"
+    private val sequenceName = "csi_item_id_seq"
+
+
+    override fun setup() {
         createRarityType()
 
         jdbcTemplate.execute(
-            "CREATE TABLE IF NOT EXISTS csi_item (" +
-            "id BIGINT PRIMARY KEY, " +
-            "name VARCHAR(128), " +
-            "rarity csi_rarity_enum" +
-            ")"
+            """
+            CREATE TABLE IF NOT EXISTS 
+            $tableName (
+            
+                id BIGINT PRIMARY KEY,
+                name VARCHAR(128), 
+                rarity $rarityEnum
+                
+            )
+            """.trimIndent()
         )
 
         createItemSequence()
@@ -45,37 +52,55 @@ open class ItemEntityRepositoryJdbc: ItemEntityRepository {
         // lgtm, because it's enum propagation
         try {
             jdbcTemplate.execute(
-                "CREATE TYPE csi_rarity_enum AS ENUM (${Rarity.entries.joinToString(", ") { "'$it'" }})"
+                "CREATE TYPE $rarityEnum AS ENUM (${Rarity.entries.joinToString(", ") { "'$it'" }})"
             )
         } catch (e: Exception) {
-            log.debug("Error creating csi_rarity_enum type: {}", e.message)
+            log.debug("Error creating $rarityEnum type: {}", e.message)
         }
     }
 
     private fun createItemSequence() {
-        jdbcTemplate.execute("CREATE SEQUENCE IF NOT EXISTS csi_item_id_seq START WITH 1 OWNED BY csi_item.id")
+        jdbcTemplate.execute("CREATE SEQUENCE IF NOT EXISTS $sequenceName START WITH 1 OWNED BY $tableName.id")
     }
 
     override fun save(item: ItemEntity) {
         if (item.id != 0L) {
             jdbcTemplate.update(
-                "UPDATE csi_item SET name = ?, rarity = CAST(? as csi_rarity_enum) WHERE id = ?",
+                "UPDATE $tableName SET name = ?, rarity = CAST(? as $rarityEnum) WHERE id = ?",
                 item.name, item.rarity.toString(), item.id
             )
             return
         }
 
-        jdbcTemplate.query("SELECT nextval('csi_item_id_seq')") { rs ->
+        jdbcTemplate.query("SELECT nextval('$sequenceName')") { rs ->
             item.overrideId(rs.getLong(1))
         }
         jdbcTemplate.update(
-            "INSERT INTO csi_item (id, name, rarity) VALUES (?, ?, CAST(? as csi_rarity_enum))",
+            "INSERT INTO $tableName (id, name, rarity) VALUES (?, ?, CAST(? as $rarityEnum))",
             item.id, item.name, item.rarity.toString()
         )
     }
 
+    override fun delete(id: Long) {
+        jdbcTemplate.execute(
+            """
+            DELETE FROM $tableName
+            WHERE id = $id
+            """.trimIndent()
+        )
+    }
+
     override fun findAll(): Iterable<ItemEntity> {
-        return jdbcTemplate.query("SELECT * FROM csi_item", rowMapper)
+        return jdbcTemplate.query("SELECT * FROM $tableName", rowMapper)
+    }
+
+
+    override fun drop() {
+
+        jdbcTemplate.execute("DROP TABLE IF EXISTS $tableName CASCADE")
+        jdbcTemplate.execute("DROP TYPE IF EXISTS $rarityEnum")
+        jdbcTemplate.execute("DROP SEQUENCE IF EXISTS $sequenceName")
+
     }
 
 }

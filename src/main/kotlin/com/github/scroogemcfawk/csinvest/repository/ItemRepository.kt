@@ -8,10 +8,20 @@ import org.springframework.jdbc.core.RowMapper
 @NoRepositoryBean
 interface ItemRepository<PK, T> : Repository<PK, T> {
 
+    val tableName: String
+
     val rowMapper: RowMapper<T>
 
     fun save(item: T)
 
+    fun delete(id: PK)
+
     fun findAll(): Iterable<T>
+
+    // DANGER
+
+    fun setup()
+
+    fun drop()
 
 }
